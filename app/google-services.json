@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "977766026338",
+    "project_id": "hobbyconnect-f9032",
+    "storage_bucket": "hobbyconnect-f9032.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977766026338:android:0e7d90904fd8f4b525153b",
+        "android_client_info": {
+          "package_name": "com.example.hobbyconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXYH0dkGy4iaqUkkV7xwHbzNZqV65vN-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Hobbyconnect</string>
+    <string name="app_title" />
+    <string name="create_post_button">Create</string>
+    <string name="empty_state_message">Create your first post!</string>
+    <string name="default_notification_channel_id">default_channel</string>
+    <string name="fab_create_post_description">Create a new post</string>
+    <string name="empty_state_image">Empty state placeholder image</string>
+    <string-array name="hobby_list">
+        <item>Gardening</item>
+        <item>Painting</item>
+        <item>Cooking</item>
+        <item>Photography</item>
+        <item>Reading</item>
+        <item>Gaming</item>
+        <item>Dance</item>
+        <item>Writing</item>
+        <item>Sports</item>
+        <item>Music</item>
+    </string-array>
+    <string-array name="sort_options">
+        <item>Sort by Newest</item>
+        <item>Sort by Oldest</item>
+    </string-array>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="title_activity_favorites">FavoritesActivity</string>
+    <string name="post_image" />
+    <string name="delete_post" />
+    <string name="edit_post" />
+    <string name="like_button" />
+    <string name="comment_button" />
+    <string name="search_icon" />
+    <string name="back_arrow" />
+    <string name="weather_icon_description" />
+</resources>
