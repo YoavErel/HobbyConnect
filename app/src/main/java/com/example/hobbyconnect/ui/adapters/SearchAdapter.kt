@@ -59,3 +59,4 @@ class SearchAdapter(private var results: List<Post>) : RecyclerView.Adapter<Sear
         }
     }
 }
+
