@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 import android.content.SharedPreferences
 import android.widget.CheckBox
+import com.example.hobbyconnect.ui.MainActivity
 
 class LoginActivity : AppCompatActivity() {
 

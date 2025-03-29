@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.hobbyconnect.LoginActivity
 import com.example.hobbyconnect.R
 import com.example.hobbyconnect.data.AppDatabase
 import com.example.hobbyconnect.data.UserEntity

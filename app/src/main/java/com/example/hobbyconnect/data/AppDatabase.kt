@@ -9,7 +9,6 @@ import androidx.room.RoomDatabase
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun postDao(): PostDao
-    abstract fun followerDao(): FollowerDao
     abstract fun userDao(): UserDao
     abstract fun userLikesDao(): UserLikesDao
 
