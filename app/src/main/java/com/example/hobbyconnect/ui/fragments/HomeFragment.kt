@@ -1,5 +1,6 @@
 package com.example.hobbyconnect.ui.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,6 +41,7 @@ class HomeFragment : Fragment() {
     private lateinit var weatherTemperature: TextView
     private lateinit var weatherConditions: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private var userHobbies: List<String> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -58,13 +60,18 @@ class HomeFragment : Fragment() {
         weatherTemperature = view.findViewById(R.id.weatherTemperature)
         weatherConditions = view.findViewById(R.id.weatherConditions)
 
-
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
+        // First, load user's hobbies
+        loadUserHobbies()
+
+        // Then observe posts (which will be filtered based on hobbies)
         viewModel.posts.observe(viewLifecycleOwner) { postEntities ->
             Log.d("HomeFragment", "Observed posts: $postEntities")
             if (!postEntities.isNullOrEmpty()) {
-                fetchAvatarsAndDisplayPosts(postEntities.map { it.toPost() })
+                // Convert to Post objects and filter by user hobbies
+                val allPosts = postEntities.map { it.toPost() }
+                filterAndDisplayPosts(allPosts)
             } else {
                 showEmptyState()
             }
@@ -73,14 +80,66 @@ class HomeFragment : Fragment() {
         btnCreate.setOnClickListener { navigateToPostCreation() }
 
         // Load weather
-            loadWeather()
-
+        loadWeather()
 
         swipeRefreshLayout.setOnRefreshListener {
             refreshData() // Call a method to reload data
         }
 
         return view
+    }
+
+    private fun loadUserHobbies() {
+        val currentUserId = getCurrentUserId()
+        if (currentUserId.isEmpty()) return
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val db = AppDatabase.getDatabase(requireContext())
+                val userEntity = db.userDao().getUserById(currentUserId)
+
+                userEntity?.let {
+                    // Parse hobbies string into a list
+                    userHobbies = if (!it.hobbies.isNullOrEmpty()) {
+                        it.hobbies.split(", ").map { hobby -> hobby.trim() }
+                    } else {
+                        emptyList()
+                    }
+
+                    Log.d("HomeFragment", "User hobbies loaded: $userHobbies")
+
+                    // Reload posts with the new hobby filter
+                    viewModel.refreshPosts()
+                }
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Error loading user hobbies: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Failed to load user preferences", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun filterAndDisplayPosts(allPosts: List<Post>) {
+        // If no hobbies are selected, show empty state
+        if (userHobbies.isEmpty()) {
+            Log.d("HomeFragment", "No user hobbies found, showing empty state")
+            showEmptyState()
+            return
+        }
+
+        // Filter posts by user's hobbies
+        val filteredPosts = allPosts.filter { post ->
+            userHobbies.contains(post.hobby)
+        }
+
+        Log.d("HomeFragment", "Filtered posts: ${filteredPosts.size} out of ${allPosts.size}")
+
+        if (filteredPosts.isEmpty()) {
+            showEmptyState()
+        } else {
+            fetchAvatarsAndDisplayPosts(filteredPosts)
+        }
     }
 
     private fun toggleLike(post: Post) {
@@ -113,16 +172,9 @@ class HomeFragment : Fragment() {
         }
     }
 
-
-
-
     private fun getCurrentUserId(): String {
         return FirebaseAuth.getInstance().currentUser?.uid ?: ""
     }
-
-
-
-
 
     private fun fetchAvatarsAndDisplayPosts(posts: List<Post>) {
         val currentUserId = getCurrentUserId()
@@ -146,7 +198,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-
     private fun showEmptyState() {
         recyclerView.visibility = View.GONE
         emptyStateLayout.visibility = View.VISIBLE
@@ -169,16 +220,15 @@ class HomeFragment : Fragment() {
         findNavController().navigate(R.id.action_homeFragment_to_addPostFragment)
     }
 
-
-
+    @SuppressLint("SetTextI18n")
     private fun loadWeather() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val weatherService = WeatherService()
                 val weatherResponse = weatherService.fetchWeather()
 
-                // Update UI with the fetched weather data
-                weatherCity.text = "Haifa" // This is hardcoded since the city is fixed
+
+                weatherCity.text = "Haifa" // Hardcoded city for now
                 weatherTemperature.text = "${weatherResponse.current.temperature}°C"
                 weatherConditions.text = weatherResponse.current.summary
             } catch (e: Exception) {
@@ -189,7 +239,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun refreshData() {
-        // Refresh posts
+        // Reload user hobbies first
+        loadUserHobbies()
+
+        // Refresh posts (will be filtered based on updated hobbies)
         viewModel.refreshPosts()
 
         // Refresh weather data
@@ -199,22 +252,12 @@ class HomeFragment : Fragment() {
         lifecycleScope.launch {
             delay(1000) // Add slight delay to simulate data load
             swipeRefreshLayout.isRefreshing = false
-            reloadFragment()
         }
     }
 
-    private fun reloadFragment() {
-        parentFragmentManager.beginTransaction().apply {
-            detach(this@HomeFragment) // Detach the current fragment
-            attach(this@HomeFragment) // Attach the same fragment instance to reload
-            commit() // Commit the transaction
-        }
+    override fun onResume() {
+        super.onResume()
+        // Reload user hobbies and refresh posts when returning to this fragment
+        loadUserHobbies()
     }
-
-
-
-
-
-
-
 }
